@@ -1,33 +1,64 @@
+=head1 Map Data
+
+An export of the public map data (ie the Stars), is available to download in an easy to use CSV format. The URL is
+
+ http://gameservername.lacunaexpanse.com.s3.amazonaws.com/stars.csv
+
+So if the server name is "us-east-1", then the the URL would be
+
+ http://us-east-1.lacunaexpanse.com.s3.amazonaws.com/stars.csv
+
 =head1 Map Methods
 
 These methods are accessible via the C</map> URL.
 
-=head2 get_stars ( session_id, x1, y1, x2, y2, z )
+=head2 get_stars ( session_id, x1, y1, x2, y2 )
 
-Retrieves a chunk of the map and returns it as an array of hashes.
+Retrieves a chunk of the map and returns it as an array of hashes. B<Note:> Coordinates without a star will not be returned in the results.
 
- [
-    {
-        "name"          : "Sol",
-        "can_name"      : 1,
-        "color"         : "yellow",
-        "x"             : -41,
-        "y"             : 27,
-        "z"             : 14,
-        "alignments"    : [ "self", "ally" ]
-    }.
-    {
-        "name"          : "X143S",
-        "can_name"      : 0,
-        "color"         : "green",
-        "x"             : -42,
-        "y"             : 27,
-        "z"             : 14,
-        "alignments"    : [ "unprobed" ]
-    }
- ]
+ { 
+    "stars" : [
+        {
+            "name"          : "Sol",
+            "color"         : "yellow",
+            "x"             : -41,
+            "y"             : 27,
+            "bodies"        : [     # only added if a probe is present
+                {
+                    same data as get_status() on /body
+                },
+                ...
+            ]
+        },
+        {
+            "name"          : "X143S",
+            "color"         : "green",
+            "x"             : -42,
+            "y"             : 27
+        }
+     ],
+    "status" : { ... }
+ }
 
-The requested area can be no larger than 100 stars. Throws 1003 when the area is too large.
+The data you retrieve will allow you to draw a standard cartesian plane like the following. 
+
+              y
+              
+              |
+              |
+     (-3,3)   |  (3,3)
+              |
+ -x ----------+---------- x
+              |
+     (-3,-3)  |  (3,-3)
+              |
+              |
+
+             -y
+
+
+The requested area can be no larger than 400 spaces (20x20). Throws 1003 when the area is too large. 
+
 
 =head3 session_id
 
@@ -49,9 +80,160 @@ The bottom right x coord.
 
 The bottom right y coord.
 
-=head3 z
 
-The z axis. There's no secondary z coordinate because you can only pull from one z axis at a time.
+=head2 check_star_for_incoming_probe ( session_id, star_id )
+
+If the star has a status of "unprobed", call this method to find out if there is an incoming probe from this empire. 
+
+ {
+    "status" : { ... },
+    "incoming_probe" : "01 31 2010 13:09:05 +0600" # date of arrival will be present if there is an incoming probe
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 star_id
+
+The unique id for a star.
+
+
+
+=head2 get_star (session_id, star_id)
+
+Retrieves info on a single star.
+
+ { 
+    "star" : {
+        "name"          : "Sol",
+        "color"         : "yellow",
+        "x"             : -41,
+        "y"             : 27,
+        "bodies"        : [     # only added if a probe is present
+            {
+                same data as get_status() on /body
+            },
+            ...
+        ]
+    }    
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 star_id
+
+The unique id of the star.
+
+
+
+=head2 get_star_by_name (session_id, name)
+
+Retrieves info on a single star.
+
+ { 
+    "star" : {
+        "name"          : "Sol",
+        "color"         : "yellow",
+        "x"             : -41,
+        "y"             : 27,
+        "bodies"        : [     # only added if a probe is present
+            {
+                same data as get_status() on /body
+            },
+            ...
+        ]
+    }    
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 name
+
+The exact name of a star. Case insensitive.
+
+
+
+=head2 get_star_by_xy (session_id, x, y)
+
+Retrieves info on a single star.
+
+ { 
+    "star" : {
+        "name"          : "Sol",
+        "color"         : "yellow",
+        "x"             : -41,
+        "y"             : 27,
+        "bodies"        : [     # only added if a probe is present
+            {
+                same data as get_status() on /body
+            },
+            ...
+        ]
+    }    
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 x
+
+The x coordinate of a star.
+
+=head3 y
+
+The y coordinate of a star.
+
+
+
+=head2 search_stars (session_id, name)
+
+If you know a partial name of a star you can search for it. Returns up to 25 results. No body data is returned with this search.
+
+ { 
+    "stars" : [
+        {
+            "name"          : "Sol",
+            "color"         : "yellow",
+            "x"             : -41,
+            "y"             : 27
+        },
+        {
+            "name"          : "Minsol",
+            "color"         : "green",
+            "x"             : -42,
+            "y"             : 27
+        }
+     ],
+    "status" : { ... }
+ }
+
+
+=head3 session_id
+
+A session id.
+
+=head3 name
+
+A partial name of a star. Case insensitive. Must be at least 3 characters.
+
+
+
+=head1 FAQ
+
+These are common questions about this API.
+
+=head2 What is a body?
+
+A body is any object that orbits a star. In Lacuna terms this means a body is a habitable planet, gas giant planet, space station, or asteroid.
 
 =cut
 

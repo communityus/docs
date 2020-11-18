@@ -1,0 +1,437 @@
+=head1 Trade Ministry Diagram
+
+The Trade Ministry is a complex beast, so to help you wrap your brain around it we've created a little flow diagram of how the methods come together.
+
+=begin html
+
+<img src="Trade.png">
+<br>
+<a href="Trade.graffle">OmniGraffle Version</a>
+
+=end html
+
+=head1 Trade Ministry Methods
+
+The Trade Ministry is accessible via the URL C</trade>. It allows you to send cargo ships to other players with trade goods. Due to the vast distance of space, you may only trade with other players in your zone.
+
+The list of methods below represents changes and additions to the methods that all L<Buildings> share.
+
+
+=head2 add_trade ( session_id, building_id, offer, ask )
+
+Queues a trade for others to see. Returns:
+
+ {
+    "trade_id" : "id-goes-here",
+    "status" : { ... },
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of the trade ministry.
+
+=head3 offer
+
+A hash reference containing the details of what you are offering.
+
+=head4 type
+
+A string. Must contain one of the following values: ship, glyph, plan, prisoner, water, energy, waste, essentia, bean, lapis, potato, apple, root, corn, cider, wheat, bread, soup, chip, pie, pancake, milk, meal, algae, syrup, fungus, burger, shake, beetle, rutile, chromite, chalcopyrite, galena, gold, uraninite, bauxite, goethite, halite, gypsum, trona, kerogen, methane, anthracite, sulfur, zircon, monazite, fluorite, beryl, or magnetite.
+
+B<NOTE> If you choose ship, glyph, plan, or prisoner, see C<ship_id>, C<glyph_id>, C<plan_id>, and C<prisoner_id> below.
+
+=head4 quantity
+
+An integer representing the amount of a resource that you're trading. Only needed for resources or essentia. All others default to quantity 1.
+
+=head4 ship_id
+
+The unique id of a ship that you wish to trade. See the C<get_ships> method.
+
+=head4 glyph_id
+
+The unique id of a glyph that you wish to trade. See the C<get_glyphs> method.
+
+=head4 prisoner_id
+
+The unique id of a prisoner that you wish to trade. See the C<get_prisoners> method.
+
+=head4 plan_id
+
+The unique id of a plan that you sih to trade. See the C<get_plans> method. 
+
+=head3 ask
+
+A hash reference containing the details of what you wish to receive in exchange for your offer.
+
+=head4 type
+
+A string. Must contain one of the following values: water, energy, waste, essentia, bean, lapis, potato, apple, root, corn, cider, wheat, bread, soup, chip, pie, pancake, milk, meal, algae, syrup, fungus, burger, shake, beetle, rutile, chromite, chalcopyrite, galena, gold, uraninite, bauxite, goethite, halite, gypsum, trona, kerogen, methane, anthracite, sulfur, zircon, monazite, fluorite, beryl, or magnetite.
+
+=head4 quantity
+
+An integer representing the amount of a resource that you're asking for. 
+
+
+
+
+=head2 get_ships ( session_id, building_id )
+
+Returns a list of ships that may be traded. Used with the C<add_trade> method.
+
+ {
+    "ships" : [
+        {
+            "id" : "id-goes-here",
+            "name" : "Enterprise",
+            "type" : "probe",
+            "hold_size" : 0,
+            "speed" : 3900
+        },
+        ...
+    ],
+    "cargo_space_used_each" : 10000,
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+
+=head2 get_prisoners ( session_id, building_id )
+
+Returns a list of prisoners that may be traded. Used with the C<add_trade> method.
+
+ {
+    "prisoners" : [
+        {
+            "id" : "id-goes-here",
+            "name" : "Jack Bauer",
+            "level" : "5"
+        },
+        ...
+    ],
+    "cargo_space_used_each" : 100,
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+
+=head2 get_plans ( session_id, building_id )
+
+Returns a list of plans that may be traded. Used with the C<add_trade> method.
+
+ {
+    "plans" : [
+        {
+            "id" : "id-goes-here",
+            "name" : "Intelligence Ministry",
+            "level" : "7",
+            "extra_build_level" : "0"        # some special plans will build a building from their level all the way to this number
+        },
+        ...
+    ],
+    "cargo_space_used_each" : 100,
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+
+
+
+
+=head2 get_glyphs ( session_id, building_id )
+
+Returns a list of glyphs that may be traded. Used with the C<add_trade> method.
+
+ {
+    "glyphs" : [
+        {
+            "id" : "id-goes-here",
+            "type" : "bauxite"
+        },
+        ...
+    ],
+    "cargo_space_used_each" : 100,
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+
+
+=head2 withdraw_trade ( session_id, building_id, trade_id )
+
+Remove a trade that you have offered and collect the items up for trade.
+
+ {
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+=head3 trade_id
+
+The unique id of the trade.
+
+
+
+
+=head2 accept_trade ( session_id, building_id, trade_id, captcha_guid, captcha_solution )
+
+Accept a trade offer from the list of available trades. See C<view_available_trades>.
+
+ {
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+=head3 trade_id
+
+The unique id of the trade.
+
+=head3 captcha_guid
+
+The C<view_available_trades> list also includes a captcha guid. That string must be passed along with the trade.
+
+=head3 captcha_solution
+
+The captcha described by C<view_available_trades> will require the user to solve a simple puzzle to prove their humanity. The answer to that puzzle must be provided here.
+
+
+
+
+
+=head2 view_available_trades ( session_id, building_id, [ page_number ] )
+
+Displays a list of trades available at the present time.
+
+ {
+    "trades" : [
+        {
+            "date_offered" : "01 31 2010 13:09:05 +0600",
+            "id" : "id-goes-here",
+            "ask_type" : "bauxite",
+            "ask_quantity" : 10000,
+            "ask_description" : "10000 Bauxite",
+            "offer_type" : "prisoner",
+            "offer_quantity" : 1,
+            "offer_description" : "Spy Named Jack Bauer (Level: 21)"
+        },
+        ...
+    ],
+    "trade_count" : 1047,
+    "page_number" : 1,
+    "captcha" : {
+        "guid" : "id-goes-here",
+        "url" : "https://url.to.image.goes.here/captcha.png"
+    },
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+=head3 page_number
+
+An integer representing the page of trades (25 per page) to return. Defaults to 1.
+
+
+
+
+=head2 view_my_trades ( session_id, building_id, [ page_number ] )
+
+Displays a list of trades the current user has posted.
+
+ {
+    "trades" : [
+        {
+            "date_offered" : "01 31 2010 13:09:05 +0600",
+            "id" : "id-goes-here",
+            "ask_type" : "bauxite",
+            "ask_quantity" : 10000,
+            "ask_description" : "10000 Bauxite",
+            "offer_type" : "prisoner",
+            "offer_quantity" : 1,
+            "offer_description" : "Spy Named Jack Bauer (Level: 21)"
+        },
+        ...
+    ],
+    "trade_count" : 17,
+    "page_number" : 1,
+    "status" : { ... }
+ }
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+=head3 page_number
+
+An integer representing the page of trades (25 per page) to return. Defaults to 1.
+
+
+
+=head2 get_stored_resources ( session_id, building_id )
+
+Returns a list of the resources you have stored to make it easier to identify what you want to trade.
+
+ {
+    "status" : { ... },
+    "cargo_space_used_each" : 1,
+    "resources" : {
+            "water" : 14000,
+            "waste" : 393,
+            "bauxite" : 47,
+            "cheese" : 1193,
+            ...
+    }
+ }
+ 
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+
+
+=head2 push_items ( session_id, building_id, target_id, items )
+
+=head3 session_id
+
+A session id.
+
+=head3 building_id
+
+The unique id of this building.
+
+=head3 target_id
+
+The unqiue id of the planet that you control, that you want to send resources to.
+
+B<NOTE:> The list of your planets comes back with every empire status message.
+
+=head3 items
+
+An array reference of hash references of items you wish to ship to the target planet. There are three types items that can be shipped via this mechanism. They are resources, glyphs, and plans.
+
+=over
+
+=item resources
+
+The hash reference for resources looks like:
+
+ {
+    "type" : "bauxite",
+    "quantity" : 10000
+ }
+
+=over
+
+=item type
+
+The type of resource you want to ship. Available types are: water, energy, waste, essentia, bean, lapis, potato, apple, root, corn, cider, wheat, bread, soup, chip, pie, pancake, milk, meal, algae, syrup, fungus, burger, shake, beetle, rutile, chromite, chalcopyrite, galena, gold, uraninite, bauxite, goethite, halite, gypsum, trona, kerogen, methane, anthracite, sulfur, zircon, monazite, fluorite, beryl, or magnetite.
+
+=item quantity
+
+The amount of the resource that you want to ship.
+
+=back
+
+=item glyphs
+
+The hash reference for glyphs looks like:
+
+ {
+    "type" : "glyph",
+    "glyph_id" : "id-goes-here"
+ }
+ 
+=over
+
+=item type
+
+Must be exactly C<glyph>.
+
+=item glyph_id
+
+The unique id of the glyph you want to ship. See the C<get_glyphs> method for a list of your glyphs.
+ 
+=back
+
+
+=item plans
+
+=over
+
+=item type
+
+Must be exactly C<plan>.
+
+=item plan_id
+
+The unique id of the plan that you want to ship. See the C<get_plans> method for a list of your plans.
+
+=back
+
+=back
+
+
+
+
+
+=cut
